@@ -87,11 +87,8 @@ Let's apply our config and check :
 
 ```sh
 k8s-redis/env/dev ➭ kubectl apply -k ./
-configmap/nginx-config created
-service/nginx created
 service/redis-sentinel created
 service/redis created
-deployment.apps/nginx created
 deployment.apps/redis-sentinel created
 deployment.apps/redis created
 
