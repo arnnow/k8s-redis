@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    tier: redis
+    role: redis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis
+      tier: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+        tier: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:v5
+          ports:
+           - containerPort: 6379
+          volumeMounts:
+            - mountPath: /redis-master-data
+              name: data
+          resources:
+            limits:
+              cpu: "0.1"
+      volumes:
+        - name: data

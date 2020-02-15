@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  template:
+    spec:
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+          items:
+            - key: config
+              path: site.conf
