@@ -3,12 +3,3 @@ kind: Kustomization
 
 bases:
   - ../../base
-
-patchesStrategicMerge:
-  - patch-nginx-configmap.yaml
-
-resources:
-  - nginx_configMap.yaml
-
-commonAnnotations:
-  documentation: ""

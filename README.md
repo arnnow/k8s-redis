@@ -1,10 +1,10 @@
 # Setup redis & redis-sentinel using kustomize
-based on [redis](https://github.com/kubernetes/examples/tree/master/staging/storage/redis) byt adapted for services/deployment & kustomize
-Using Redis V5 - Dockerfile adapted from [this](https://hub.docker.com/_/redis/)
+based on [redis](https://github.com/kubernetes/examples/tree/master/staging/storage/redis) but adapted for services/deployment & kustomize  
+Using Redis V5 - Dockerfile adapted from [this](https://hub.docker.com/_/redis/)  
 
 ### Building you image for minikube
 #### Creating the image
-We will here create a docker image via a dockerfile and use it directly in minikube without pushing it onto a repository
+We will here create a docker image via a dockerfile and use it directly in minikube without pushing it onto a repository  
 the dockerfile is here
 ```bash
 # Set docker env
@@ -57,8 +57,9 @@ pod/redis-bootstrap   2/2     Running   0          49s   172.17.0.5   minikube  
 
 We have a pod running with :
 * redis as master
-* redis-sentinel
-the pod is tag as:
+* redis-sentinel  
+
+Labels have been set onto the pod
 ```
 metadata:
   name: redis-bootstrap
@@ -66,7 +67,7 @@ metadata:
     app: redis
     tier: redis-sentinel
 ```
-Our redis-sentinel services will adopt this pod as it's selector is set to :
+Our redis-sentinel services will adopt this pod as its selector is set to :
 ```
 spec:
   selector:
@@ -75,12 +76,12 @@ spec:
 ```
 So when our redis-sentinel pod will start and query try to connect to sentinel in order to get the master IP, they will reach the running
 redis-sentinel.
-in our image/run.sh
+in our [image/run.sh](image/run.sh)
 ```
 master=$(redis-cli -h ${REDIS_SENTINEL_SERVICE_HOST} -p ${REDIS_SENTINEL_SERVICE_PORT} --csv SENTINEL get-master-addr-by-name mymaster | tr
 ',' ' ' | cut -d' ' -f1)
 ```
-REDIS_SENTINEL_SERVICE_HOST & REDIS_SENTINEL_SERVICE_PORT is set by the service redis-sentinel.
+```REDIS_SENTINEL_SERVICE_HOST``` & ```REDIS_SENTINEL_SERVICE_PORT``` are set by the service redis-sentinel.
 
 Let's apply our config and check :
 
@@ -97,7 +98,7 @@ deployment.apps/redis created
 k8s-redis/env/dev ➭ kubectl describe service/redis-sentinel | grep Endpoints
 Endpoints:         172.17.0.12:26379,172.17.0.5:26379,172.17.0.6:26379 + 1 more...
 ```
-As we can see the pod/redis-bootstrap pod is part of the service now. And query to this "Sentinel" service will reach it. Thus enabling the
+As we can see the ```pod/redis-bootstrap``` is part of the service now. Query to this "Sentinel" service will reach it. Thus enabling the
 other services to be configured.
 
 Here are the logs of one of the new sentinel pods
@@ -118,7 +119,8 @@ the lower value of 128.
 11:X 15 Feb 2020 22:14:42.916 * +slave slave 172.17.0.9:6379 172.17.0.9 6379 @ mymaster 172.17.0.5 6379
 ```
 
-we can now delete the initial pod/redis-bootstrap. Our redis should now be electing a new master from the one deployed by kustomize
+### Deleting the initial master/sentinel pod
+we can now delete the initial ```pod/redis-bootstrap```. Our redis should now be electing a new master from the one deployed by kustomize
 ```
 11:X 15 Feb 2020 22:19:31.214 # +odown master mymaster 172.17.0.5 6379 #quorum 3/2
 11:X 15 Feb 2020 22:19:31.214 # +new-epoch 1
