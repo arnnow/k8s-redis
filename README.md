@@ -10,7 +10,7 @@ the dockerfile is here
 # Set docker env
 {22:17}~/k8s-redis:master ✗ ➭ eval $(minikube docker-env)
 
-{22:17}~/k8s-redis/image:master ✗ ➭ docker build -t redis:v1 .
+{22:17}~/k8s-redis/image:master ✗ ➭ docker build -t redis:v5 .
 Sending build context to Docker daemon  3.072kB
 Step 1/12 : FROM alpine:3.11
 ...
