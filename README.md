@@ -3,34 +3,6 @@ based on [redis](https://github.com/kubernetes/examples/tree/master/staging/stor
 Using Redis V5 - Dockerfile adapted from [this](https://hub.docker.com/_/redis/)  
 
 ### Building you image for minikube
-#### Creating the image
-We will here create a docker image via a dockerfile and use it directly in minikube without pushing it onto a repository  
-the dockerfile is here
-```bash
-# Set docker env
-{22:17}~/k8s-redis:master ✗ ➭ eval $(minikube docker-env)
-
-{22:17}~/k8s-redis/image:master ✗ ➭ docker build -t redis:v5 .
-Sending build context to Docker daemon  3.072kB
-Step 1/12 : FROM alpine:3.11
-...
-Successfully built bb7702cc6a2b
-Successfully tagged redis:v5
-```
-Your image should be present in minikube
-```bash
-{22:23}~/k8s-redis:master ✗ ➭ minikube ssh
-                         _             _
-            _         _ ( )           ( )
-  ___ ___  (_)  ___  (_)| |/')  _   _ | |_      __
-/' _ ` _ `\| |/' _ `\| || , <  ( ) ( )| '_`\  /'__`\
-| ( ) ( ) || || ( ) || || |\`\ | (_) || |_) )(  ___/
-(_) (_) (_)(_)(_) (_)(_)(_) (_)`\___/'(_,__/'`\____)
-
-$ docker image ls | grep redis
-redis                                     v5                  bb7702cc6a2b        28 minutes ago      34MB
-```
-
 
 ### Turning up an initial master/sentinel pod.
 
