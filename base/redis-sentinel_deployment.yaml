@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: redis-sentinel
-          image: redis:v5
+          image: arnnow/k8s-redis:latest
           env:
             - name: SENTINEL
               value: "true"

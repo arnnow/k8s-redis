@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
     - name: master
-      image: redis:v5
+      image: arnnow/k8s-redis:latest
       ports:
        - containerPort: 6379
       env:
@@ -18,7 +18,7 @@ spec:
         - mountPath: /redis-master-data
           name: data
     - name: sentinel
-      image: redis:v5
+      image: arnnow/k8s-redis:latest
       env:
         - name: SENTINEL
           value: "true"
