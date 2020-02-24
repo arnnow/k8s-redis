@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-bootstrap
+  labels:
+    app: redis
+    tier: redis-sentinel
+spec:
+  containers:
+    - name: master
+      image: arnnow/k8s-redis:v2
+      ports:
+       - containerPort: 6379
+      env:
+        - name: MASTER
+          value: "true"
+      volumeMounts:
+        - mountPath: /redis-master-data
+          name: data
+  volumes:
+    - name: data
+      emptyDir: {}
