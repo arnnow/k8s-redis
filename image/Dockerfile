@@ -1,78 +1,26 @@
-FROM alpine:3.11
 
-# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN addgroup -S -g 1000 redis && adduser -S -G redis -u 999 redis
-# alpine already has a gid 999, so we'll use the next id
+# Copyright 2016 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-RUN apk add --no-cache \
-# grab su-exec for easy step-down from root
-		'su-exec>=0.2' \
-# add tzdata for https://github.com/docker-library/redis/issues/138
-		tzdata \
-		bash
+FROM alpine:3.8
 
-ENV REDIS_VERSION 5.0.7
-ENV REDIS_DOWNLOAD_URL http://download.redis.io/releases/redis-5.0.7.tar.gz
-ENV REDIS_DOWNLOAD_SHA 61db74eabf6801f057fd24b590232f2f337d422280fd19486eca03be87d3a82b
-
-RUN set -eux; \
-	\
-	apk add --no-cache --virtual .build-deps \
-		coreutils \
-		gcc \
-		linux-headers \
-		make \
-		musl-dev \
-		openssl-dev \
-	; \
-	\
-	wget -O redis.tar.gz "$REDIS_DOWNLOAD_URL"; \
-	echo "$REDIS_DOWNLOAD_SHA *redis.tar.gz" | sha256sum -c -; \
-	mkdir -p /usr/src/redis; \
-	tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1; \
-	rm redis.tar.gz; \
-	\
-# disable Redis protected mode [1] as it is unnecessary in context of Docker
-# (ports are not automatically exposed when running inside Docker, but rather explicitly by specifying -p / -P)
-# [1]: https://github.com/antirez/redis/commit/edd4d555df57dc84265fdfb4ef59a4678832f6da
-	grep -q '^#define CONFIG_DEFAULT_PROTECTED_MODE 1$' /usr/src/redis/src/server.h; \
-	sed -ri 's!^(#define CONFIG_DEFAULT_PROTECTED_MODE) 1$!\1 0!' /usr/src/redis/src/server.h; \
-	grep -q '^#define CONFIG_DEFAULT_PROTECTED_MODE 0$' /usr/src/redis/src/server.h; \
-# for future reference, we modify this directly in the source instead of just supplying a default configuration flag because apparently "if you specify any argument to redis-server, [it assumes] you are going to specify everything"
-# see also https://github.com/docker-library/redis/issues/4#issuecomment-50780840
-# (more exactly, this makes sure the default behavior of "save on SIGTERM" stays functional by default)
-	\
-	make -C /usr/src/redis -j "$(nproc)" all; \
-	make -C /usr/src/redis install; \
-	\
-# TODO https://github.com/antirez/redis/pull/3494 (deduplicate "redis-server" copies)
-	serverMd5="$(md5sum /usr/local/bin/redis-server | cut -d' ' -f1)"; export serverMd5; \
-	find /usr/local/bin/redis* -maxdepth 0 \
-		-type f -not -name redis-server \
-		-exec sh -eux -c ' \
-			md5="$(md5sum "$1" | cut -d" " -f1)"; \
-			test "$md5" = "$serverMd5"; \
-		' -- '{}' ';' \
-		-exec ln -svfT 'redis-server' '{}' ';' \
-	; \
-	\
-	rm -r /usr/src/redis; \
-	\
-	runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
-			| tr ',' '\n' \
-			| sort -u \
-			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-	)"; \
-	apk add --no-network --virtual .redis-rundeps $runDeps; \
-	apk del --no-network .build-deps; \
-	\
-	redis-cli --version; \
-	redis-server --version
+RUN apk add --no-cache redis sed bash
 
 COPY redis-master.conf /redis-master/redis.conf
 COPY redis-slave.conf /redis-slave/redis.conf
 COPY run.sh /run.sh
 
 CMD [ "/run.sh" ]
+
 ENTRYPOINT [ "bash", "-c" ]
