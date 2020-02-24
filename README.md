@@ -1,6 +1,5 @@
 # Setup redis & redis-sentinel using kustomize
 based on [redis](https://github.com/kubernetes/examples/tree/master/staging/storage/redis) but adapted for services/deployment & kustomize  
-Using Redis V5 - Dockerfile adapted from [this](https://hub.docker.com/_/redis/)  
 
 ### Building you image for minikube
 
