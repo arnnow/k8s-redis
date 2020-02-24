@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
     - name: master
-      image: arnnow/k8s-redis:latest
+      image: k8s.gcr.io/redis:v1
       ports:
        - containerPort: 6379
       env:
@@ -18,7 +18,7 @@ spec:
         - mountPath: /redis-master-data
           name: data
     - name: sentinel
-      image: arnnow/k8s-redis:latest
+      image: arnnow/k8s-redis:v2
       env:
         - name: SENTINEL
           value: "true"

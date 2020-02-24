@@ -6,7 +6,7 @@ metadata:
     tier: redis
     role: redis
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: redis
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: arnnow/k8s-redis:latest
+          image: arnnow/k8s-redis:v2
           ports:
            - containerPort: 6379
           volumeMounts:
